@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="InClass03b" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter first number" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rxJ-ce-i2f">
+                                <rect key="frame" x="50" y="65" width="275" height="30"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter second number" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="JDB-ef-uoc">
+                                <rect key="frame" x="50" y="134" width="275" height="30"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Result:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7yS-a1-KqK">
+                                <rect key="frame" x="50" y="179" width="275" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q5t-9Z-cmk">
+                                <rect key="frame" x="123" y="372" width="128" height="30"/>
+                                <state key="normal" title="Perform Operation"/>
+                                <connections>
+                                    <action selector="PerformOperation:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tFO-0S-iFk"/>
+                                </connections>
+                            </button>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SGP-5L-mgQ">
+                                <rect key="frame" x="50" y="220" width="275" height="29"/>
+                                <segments>
+                                    <segment title="Add"/>
+                                    <segment title="Subtract"/>
+                                    <segment title="Mutipy"/>
+                                    <segment title="Divide"/>
+                                </segments>
+                            </segmentedControl>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TFG-cX-VAR">
+                                <rect key="frame" x="160.5" y="300" width="53" height="30"/>
+                                <state key="normal" title="ClearAll"/>
+                                <connections>
+                                    <action selector="ClearAll:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ZFG-pv-Swd"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="q5t-9Z-cmk" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="7FD-bB-9Ce"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="JDB-ef-uoc" secondAttribute="trailing" constant="50" id="7LC-Vp-Igc"/>
+                            <constraint firstItem="TFG-cX-VAR" firstAttribute="top" secondItem="SGP-5L-mgQ" secondAttribute="bottom" constant="52" id="AKQ-sp-AlJ"/>
+                            <constraint firstItem="7yS-a1-KqK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="CyF-j0-mCw"/>
+                            <constraint firstItem="SGP-5L-mgQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="Dvr-J9-hSx"/>
+                            <constraint firstItem="7yS-a1-KqK" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="159" id="Esm-sJ-FDV"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="7yS-a1-KqK" secondAttribute="trailing" constant="50" id="Gyv-ij-g0j"/>
+                            <constraint firstItem="JDB-ef-uoc" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="PlU-Z6-yBU"/>
+                            <constraint firstItem="7yS-a1-KqK" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="QPg-cZ-EeI"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="SGP-5L-mgQ" secondAttribute="trailing" constant="50" id="RMT-Mf-s36"/>
+                            <constraint firstItem="SGP-5L-mgQ" firstAttribute="top" secondItem="7yS-a1-KqK" secondAttribute="bottom" constant="20" id="Ubx-dd-d6w"/>
+                            <constraint firstItem="rxJ-ce-i2f" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="Ujx-S5-s85"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="rxJ-ce-i2f" secondAttribute="trailing" constant="50" id="Ypl-yc-td8"/>
+                            <constraint firstItem="rxJ-ce-i2f" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="cix-PC-Bzp"/>
+                            <constraint firstItem="rxJ-ce-i2f" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="45" id="ei8-UI-LbK"/>
+                            <constraint firstItem="7yS-a1-KqK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="hNS-9V-UdM"/>
+                            <constraint firstItem="JDB-ef-uoc" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="iq1-yt-XQR"/>
+                            <constraint firstItem="rxJ-ce-i2f" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="mrE-NE-b3z"/>
+                            <constraint firstItem="JDB-ef-uoc" firstAttribute="top" secondItem="rxJ-ce-i2f" secondAttribute="bottom" constant="39" id="mtl-E9-3wd"/>
+                            <constraint firstItem="TFG-cX-VAR" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="sss-yr-4hd"/>
+                            <constraint firstItem="q5t-9Z-cmk" firstAttribute="top" secondItem="SGP-5L-mgQ" secondAttribute="bottom" constant="124" id="yDT-sq-Lgo"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <connections>
+                        <outlet property="FirstNumber" destination="rxJ-ce-i2f" id="pTu-zc-9g6"/>
+                        <outlet property="Result" destination="7yS-a1-KqK" id="PL7-XJ-Aps"/>
+                        <outlet property="SecondNumber" destination="JDB-ef-uoc" id="zhU-ob-73P"/>
+                        <outlet property="segmentedControl" destination="SGP-5L-mgQ" id="SCE-Cf-4NB"/>
+                    </connections>
+                </viewController>
+            </objects>
+        </scene>
+    </scenes>
+</document>

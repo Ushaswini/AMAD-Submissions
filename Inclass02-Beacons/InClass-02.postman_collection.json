@@ -1,0 +1,110 @@
+{
+	"id": "498e01a7-687b-172c-de22-1f567ba0ad26",
+	"name": "InClass-02",
+	"description": "",
+	"order": [
+		"8d727b10-697d-a361-60ee-13c282ec2576",
+		"ac223fb2-ebee-c56b-e877-7fc46fb1412f",
+		"b71982be-fee5-3c43-53f4-4e1259c49232"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 1505306166246,
+	"owner": "1794861",
+	"public": false,
+	"requests": [
+		{
+			"id": "8d727b10-697d-a361-60ee-13c282ec2576",
+			"headers": "",
+			"headerData": [],
+			"url": "http://inclass02-discountsapi.azurewebsites.net/api/Discounts?regionName=lifeStyle",
+			"queryParams": [
+				{
+					"key": "regionName",
+					"value": "lifeStyle",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "498e01a7-687b-172c-de22-1f567ba0ad26",
+			"data": null,
+			"dataMode": "params",
+			"name": "Lifestyle request",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1505306169656,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "ac223fb2-ebee-c56b-e877-7fc46fb1412f",
+			"headers": "",
+			"headerData": [],
+			"url": "http://inclass02-discountsapi.azurewebsites.net/api/Discounts?regionName=produce",
+			"queryParams": [
+				{
+					"key": "regionName",
+					"value": "produce",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "498e01a7-687b-172c-de22-1f567ba0ad26",
+			"data": null,
+			"dataMode": "params",
+			"name": "Produce request",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1505306227472,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "b71982be-fee5-3c43-53f4-4e1259c49232",
+			"headers": "",
+			"headerData": [],
+			"url": "http://inclass02-discountsapi.azurewebsites.net/api/Discounts?regionName=grocery",
+			"queryParams": [
+				{
+					"key": "regionName",
+					"value": "grocery",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "498e01a7-687b-172c-de22-1f567ba0ad26",
+			"data": null,
+			"dataMode": "params",
+			"name": "Grocery request",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1505306281250,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		}
+	]
+}
