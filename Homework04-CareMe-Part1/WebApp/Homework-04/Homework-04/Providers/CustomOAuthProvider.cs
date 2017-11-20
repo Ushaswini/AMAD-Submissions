@@ -27,7 +27,7 @@ namespace Homework_04.Providers
             var ticket = new AuthenticationTicket(SetClaimsIdentityAsync(context, user), null);
             context.Validated(ticket);
 
-            return Task.FromResult<object>(null);
+            return Task.FromResult<object>(user);
         }
 
         public override Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)

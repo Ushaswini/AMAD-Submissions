@@ -20,6 +20,11 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
+                    @if (Request.IsAuthenticated)
+                    {
+                        <li>@Html.ActionLink("SignOut", "LogOff", "Home", new { area = "" }, null)</li>
+                    }
+                    
                     <!--<li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, null)</li>
                     <li>@Html.ActionLink("API", "Index", "Help", new { area = "" }, null)</li>-->
                 </ul>
@@ -41,6 +46,7 @@
         yourApp.Urls.surveyManageUrl = '@Url.Action("Manage","Survey")';
         yourApp.Urls.responseManageUrl = '@Url.Action("Index","Response")';
         yourApp.Urls.homeScreenUrl = '@Url.Action("Index","Home")';
+        yourApp.Urls.userMessagesUrl = '@Url.Action("Index","User")';
 
     </script>
     @Scripts.Render("~/bundles/jquery")

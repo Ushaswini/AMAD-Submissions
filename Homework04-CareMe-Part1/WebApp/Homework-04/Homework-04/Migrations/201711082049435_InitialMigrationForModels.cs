@@ -119,7 +119,7 @@ namespace Homework_04.Migrations
                     SurveyCreatedTime = c.String(),
                 })
                 .PrimaryKey(t => t.SurveyId)
-                .ForeignKey("dbo.StudyGroups", t => t.StudyGroupId)
+                .ForeignKey("dbo.StudyGroups", t => t.StudyGroupId,cascadeDelete:true)
                 .Index(t => t.StudyGroupId);
 
         }

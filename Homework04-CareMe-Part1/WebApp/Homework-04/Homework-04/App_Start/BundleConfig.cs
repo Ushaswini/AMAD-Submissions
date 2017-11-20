@@ -43,6 +43,9 @@ namespace Homework_04
             bundles.Add(new ScriptBundle("~/bundles/ResponseMange").Include(
                      "~/Scripts/knockout-{version}.js",
                       "~/Scripts/ResponseManage.js"));
+            bundles.Add(new ScriptBundle("~/bundles/MessageMange").Include(
+                     "~/Scripts/knockout-{version}.js",
+                      "~/Scripts/MessageManage.js"));
 
         }
     }

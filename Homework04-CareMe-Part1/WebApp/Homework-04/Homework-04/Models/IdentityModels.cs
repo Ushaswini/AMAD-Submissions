@@ -12,6 +12,8 @@ namespace Homework_04.Models
         public string StudyGroupId { get; set; }
         public string Gender { get; set; }
 
+        
+
         //Navigation Properties
         public StudyGroup StudyGroup { get; set; }
 

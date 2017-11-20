@@ -39,7 +39,7 @@ namespace Homework_04.Models
             
             Survey survey = new Survey {
                 SurveyCreatedTime = DateTime.Now.ToString(),
-                QuestionText = JsonConvert.SerializeObject(Survey1Questions.GetQuestions()),
+               // QuestionText = JsonConvert.SerializeObject(Survey1Questions.GetQuestions()),
                 StudyGroupId = survey1.StudyGroupId,
                 SurveyId = System.Guid.NewGuid().ToString()
             };

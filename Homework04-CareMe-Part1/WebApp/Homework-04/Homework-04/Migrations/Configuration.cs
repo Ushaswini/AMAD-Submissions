@@ -34,7 +34,7 @@ namespace Homework_04.Migrations
                 Email = "admin@gmail.com",
                 UserName = "Admin"
                // StudyGroupId = 1 + ""
-            };
+            }; 
 
             manager.Create(admin, "Admin@6010");
 

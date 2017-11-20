@@ -12,9 +12,20 @@ namespace Homework_04.Models
         public string QuestionText { get; set; }
         public string StudyGroupId { get; set; }
         public string SurveyCreatedTime { get; set; }
+        [EnumDataType(typeof(Frequency))]
+        public Frequency FrequencyOfNotifications { get; set; }
+        public string Time1 { get; set; }
+        public string Time2 { get; set; }
 
         //Navigation Properties
         public StudyGroup StudyGroup { get; set; }
+    }
+
+    public enum Frequency
+    {
+        Daily,
+        Hourly,
+        TwiceDaily
     }
 
     public class SurveyResponse

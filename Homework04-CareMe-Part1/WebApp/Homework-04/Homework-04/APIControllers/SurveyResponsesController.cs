@@ -15,6 +15,7 @@ using Homework_04.DTOs;
 
 namespace Homework_04.Controllers
 {
+    [Authorize]
     [RoutePrefix("api/SurveyResponses")]
     public class SurveyResponsesController : ApiController
     {
@@ -37,8 +38,8 @@ namespace Homework_04.Controllers
             }
 
             return Ok(surveyResponse);
-        }
 
+        }
         [ResponseType(typeof(SurveyResponse))]
         public IList<ResponseDTO> GetSurveyResponseForStudy(string studyGroupId)
         {
@@ -49,12 +50,38 @@ namespace Homework_04.Controllers
                                                 StudyGroupName = r.StudyGroup.StudyName,
                                                 SurveyId = r.SurveyId,
                                                 UserName = r.User.UserName,
-                                                SurveyResponseReceivedTime = r.SurveyResponseReceivedTime,
-                                                SurveyComments = r.SurveyComments
+                                                ResponseReceivedTime = r.SurveyResponseReceivedTime,
+                                                ResponseText = r.UserResponseText,
+                                                QuestionFrequency = ((Frequency)r.Survey.FrequencyOfNotifications).ToString(),
+                                                SurveyQuestion = r.Survey.QuestionText
+                                               // SurveyComments = r.SurveyComments
                                             });
             return result.ToList();
 
         }
+
+        [ResponseType(typeof(SurveyResponse))]
+        public IList<ResponseDTO> GetSurveyResponseOfUser(string userId)
+        {
+            var result = db.SurveyResponses.Include(r => r.StudyGroup)
+                                            .Include(r => r.Survey)
+                                            .Include(r => r.User).Where(r => r.UserId == userId)
+                                            .Select(r => new ResponseDTO
+                                            {
+                                                ResponseId = r.SurveyResponseId,
+                                                StudyGroupName = r.StudyGroup.StudyName,
+                                                SurveyId = r.SurveyId,
+                                                UserName = r.User.UserName,
+                                                ResponseReceivedTime = r.SurveyResponseReceivedTime,
+                                                ResponseText = r.UserResponseText,
+                                                QuestionFrequency = ((Frequency)r.Survey.FrequencyOfNotifications).ToString(),
+                                                SurveyQuestion = r.Survey.QuestionText
+                                                // SurveyComments = r.SurveyComments
+                                            });
+            return result.ToList();
+
+        }
+
 
         // PUT: api/SurveyResponses/5
         [ResponseType(typeof(void))]
@@ -99,8 +126,8 @@ namespace Homework_04.Controllers
             {
                 return BadRequest(ModelState);
             }
-           var comments = CalculateScore(surveyResponse);
-           surveyResponse.SurveyComments = JsonConvert.SerializeObject(comments);
+           //var comments = CalculateScore(surveyResponse);
+           //surveyResponse.SurveyComments = JsonConvert.SerializeObject(comments);
            surveyResponse.SurveyResponseId = System.Guid.NewGuid().ToString();
             db.SurveyResponses.Add(surveyResponse);
 

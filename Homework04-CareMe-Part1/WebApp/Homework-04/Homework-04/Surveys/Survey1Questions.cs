@@ -5,7 +5,7 @@ namespace Homework_04.Surveys
 {
     public static class Survey1Questions
     {
-        static ArrayList Questions = new ArrayList();
+      /*  static ArrayList Questions = new ArrayList();
         static ArrayList Options = new ArrayList();
         
         public static  void GenerateOptions()
@@ -332,6 +332,6 @@ namespace Homework_04.Surveys
             GenerateOptions();
             GenerateQuestions();
             return Questions;
-        }
+        }*/
     }
 }

@@ -2,12 +2,14 @@
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Results;
 
 namespace Homework_04.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     [RoutePrefix("api/roles")]
     public class RolesController : BaseApiController
     {
@@ -26,7 +28,9 @@ namespace Homework_04.Controllers
 
         }
 
-        [Route("", Name = "GetAllRoles")]
+       
+
+        
         public IHttpActionResult GetAllRoles()
         {
             var roles = this.AppRoleManager.Roles;

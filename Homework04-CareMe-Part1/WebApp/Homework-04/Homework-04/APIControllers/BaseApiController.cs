@@ -3,11 +3,13 @@ using Homework_04.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using PushBots.NET;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Web;
 using System.Web.Http;
 
@@ -15,7 +17,49 @@ namespace Homework_04.Controllers
 {
     public class BaseApiController : ApiController
     {
-        
+
+        private readonly PushBotsClient _pushBotsClient;
+        private const string AppId = "5a0c68d49b823ae75c8b4568"; 
+        private const string Secret = "2ea297eee9933ab16e23bbc28d1cf2c1"; 
+
+        public BaseApiController()
+        {
+            _pushBotsClient = new PushBotsClient(AppId, Secret);
+        }
+
+        protected PushBotsClient PushBots_Client
+        {
+            get
+            {
+                return _pushBotsClient;
+            }
+        }
+        private ApplicationUser _member;
+
+       
+
+        public string UserIdentityId
+        {
+            get
+            {
+                var user = UserManager.FindByName(User.Identity.Name);
+                return user.Id;
+            }
+        }
+
+        public ApplicationUser UserRecord
+        {
+            get
+            {
+                if (_member != null)
+                {
+                    return _member;
+                }
+                _member = UserManager.FindByEmail(Thread.CurrentPrincipal.Identity.Name);
+                return _member;
+            }
+            set { _member = value; }
+        }
         private ApplicationRoleManager _AppRoleManager = null;
 
         protected ApplicationRoleManager AppRoleManager

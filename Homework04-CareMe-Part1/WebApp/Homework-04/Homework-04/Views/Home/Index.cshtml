@@ -23,5 +23,13 @@
         </form>
     </div>
 
-
+    <div class="col-sm-12">
+        
+        <div class="form-group">
+            <label data-bind="value: result" />
+        </div>
+        <div class="form-group error-messages" data-bind="foreach: errors" style="color:red;">
+            <p data-bind="text: $data" />
+        </div>
+    </div>
 </div>

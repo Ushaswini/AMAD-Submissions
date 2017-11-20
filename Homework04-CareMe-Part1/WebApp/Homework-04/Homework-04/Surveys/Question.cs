@@ -6,11 +6,11 @@ namespace Homework_04.Surveys
     {
         public int QuestionNumber { get; set; }
         public string QuestionText { get; set; }
-        public int MinRating { get; set; }
-        public int MaxRating { get; set; }
-        public string RatingText { get; set; }
+       // public int MinRating { get; set; }
+       // public int MaxRating { get; set; }
+       // public string RatingText { get; set; }
         public ArrayList Options { get; set; }
-        public QuestionType QuestionType { get; set; }
+       // public QuestionType QuestionType { get; set; }
 
     }
 

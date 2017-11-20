@@ -56,6 +56,19 @@ namespace Homework_04.Controllers
             };
         }
 
+        [AllowAnonymous]
+        [Route("UserIsAdim")]
+        public IHttpActionResult GetUserForRole(string roleName, string userName)
+        {
+            var adminRole = AppRoleManager.Roles.Single(r => r.Name == roleName);
+            var user = UserManager.Users.Where(u => u.Roles.Any(r => r.RoleId == adminRole.Id) && u.UserName == userName).ToList();
+            if (user.Count > 0)
+            {
+                return Ok();
+            }
+            return NotFound();
+        }
+
         [Route("UserInfo")]
         public UserInfoViewModel GetUserInfo(string token)
         {
@@ -78,6 +91,7 @@ namespace Homework_04.Controllers
         [Route("Logout")]
         public IHttpActionResult Logout()
         {
+            
             Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
             return Ok();
         }
