@@ -228,7 +228,7 @@ namespace Homework05.API_Controllers
         {
             try
             {
-                survey.SurveyCreatedTime = DateTime.Now.ToString("EEE MMM dd yyyy HH:mm:ss z");
+               // survey.SurveyCreatedTime = DateTime.Now.ToString("0:MM/dd/yy H:mm:ss zzz");
                 survey.SurveyId = Guid.NewGuid().ToString();
                 db.Surveys.Add(survey);
 

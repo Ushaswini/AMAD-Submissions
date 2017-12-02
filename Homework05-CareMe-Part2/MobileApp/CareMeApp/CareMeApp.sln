@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareMeApp", "CareMeApp\CareMeApp.csproj", "{856D6370-A907-4989-9DD1-8D28F2F5B4AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareMeApp", "NavigationDrawer\CareMeApp.csproj", "{856D6370-A907-4989-9DD1-8D28F2F5B4AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

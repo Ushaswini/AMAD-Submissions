@@ -91,7 +91,7 @@ namespace edu.uncc.homework4
         {
             var holder = (ViewHolder)holderRaw;
             var message = mData[position];
-            holder.tvTime.Text = message.TimeToDisplay;
+            holder.tvTime.Text = PrettyTimeFormat.GetPrettyDate(message.TimeToDisplay,CONSTANTS.DATE_FORMAT);
 
             switch (message.QuestionType)
             {

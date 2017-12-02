@@ -35,7 +35,7 @@ namespace edu.uncc.homework4
         public const string SENT_TOKEN_TO_SERVER = "sentTokenToServer";
         public const string REGISTRATION_COMPLETE = "registrationComplete";
         public const string RECEIVE_NOTIFICATION_BOOLEAN = "receive";
-        public const string DATE_FORMAT = "EEE MMM dd yyyy HH:mm:ss z";
+        public const string DATE_FORMAT = "0:MM/dd/yy H:mm:ss zzz";
 
     }
 }

@@ -121,6 +121,7 @@
     <Compile Include="GCM\RegistrationIntentService.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\Constants.cs" />
+    <Compile Include="Models\PrettyTimeFormat.cs" />
     <Compile Include="Models\SurveyModels.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
