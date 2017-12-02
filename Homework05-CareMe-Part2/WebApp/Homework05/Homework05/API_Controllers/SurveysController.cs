@@ -67,6 +67,7 @@ namespace Homework05.API_Controllers
         [Route("GetSurvey")]
         public SurveysForUser GetSurveysForUser(string userId)
         {
+            var user = db.Users.Where(u => u.Id.Equals(userId)).FirstOrDefault();
             var surveysTaken = db.SurveyResponses.Where(s => s.UserId == userId).Select(s => s.SurveyId).ToList();
 
             var surveysResponded = db.SurveyResponses.Include(r => r.StudyGroup)
@@ -90,6 +91,7 @@ namespace Homework05.API_Controllers
                                             }).ToList();
 
             var surveys = (from r in db.Surveys.Include("Question")
+                           where r.StudyGroupId.Equals(user.StudyGroupId)
                           where !surveysTaken.Contains(r.SurveyId)                          
                           select new SurveyDTO
                           {
@@ -169,26 +171,28 @@ namespace Homework05.API_Controllers
                 return BadRequest(ModelState);
             }
 
-            db.Surveys.Add(survey);
+           
+
+            //db.Surveys.Add(survey);
 
             try
             {
-                db.SaveChanges();
+                //db.SaveChanges();
                 var question = db.Questions.Where(q => q.QuestionId.Equals(survey.QuestionId));
-                var surveyToSend = db.Surveys.Include(s => s.Question).Where(s => s.QuestionId.Equals(survey.QuestionId)).FirstOrDefault();
+                //
                 switch (survey.FrequencyOfNotifications)
                 {
                     case Frequency.Daily:
                         {
                             String[] times = survey.Time1.Split(':');
-                            String cornExpression = times[1] + " " + times[0] + " * * *";
-                            RecurringJob.AddOrUpdate(survey.SurveyId, () => SendNotification(surveyToSend), cornExpression, TimeZoneInfo.Local);
+                            String cornExpression =  times[1] + " " + times[0] + " * * * ";
+                            RecurringJob.AddOrUpdate(survey.SurveyId, () => SendNotification(survey), cornExpression, TimeZoneInfo.Local);
                             break;
                         }
                     case Frequency.Hourly:
                         //PushNotificationsAsync();
-                        SendNotification(surveyToSend);
-                        RecurringJob.AddOrUpdate(survey.SurveyId, () => SendNotification(surveyToSend), Cron.Hourly, TimeZoneInfo.Local);
+                        SendNotification(survey);
+                        RecurringJob.AddOrUpdate(survey.SurveyId, () => SendNotification(survey), Cron.Hourly, TimeZoneInfo.Local);
                         break;
                     case Frequency.TwiceDaily:
                         {
@@ -196,8 +200,8 @@ namespace Homework05.API_Controllers
                             String cornExpression = times[1] + " " + times[0] + " * * *";
                             String[] times2 = survey.Time2.Split(':');
                             String cornExpression2 = times2[1] + " " + times2[0] + " * * *";
-                            RecurringJob.AddOrUpdate(survey.SurveyId + "First", () => SendNotification(surveyToSend), cornExpression, TimeZoneInfo.Local);
-                            RecurringJob.AddOrUpdate(survey.SurveyId + "Second", () => SendNotification(surveyToSend), cornExpression2, TimeZoneInfo.Local);
+                            RecurringJob.AddOrUpdate(survey.SurveyId + "First", () => SendNotification(survey), cornExpression, TimeZoneInfo.Local);
+                            RecurringJob.AddOrUpdate(survey.SurveyId + "Second", () => SendNotification(survey), cornExpression2, TimeZoneInfo.Local);
                             break;
                         }
                 }
@@ -224,12 +228,25 @@ namespace Homework05.API_Controllers
         {
             try
             {
+                survey.SurveyCreatedTime = DateTime.Now.ToString("EEE MMM dd yyyy HH:mm:ss z");
+                survey.SurveyId = Guid.NewGuid().ToString();
+                db.Surveys.Add(survey);
+
+                db.SaveChanges();
+
+                var surveyToSend = db.Surveys.Include(s => s.Question).Where(s => s.SurveyId.Equals(survey.SurveyId)).FirstOrDefault();
+
                 List<string> deviceIds = new List<string>();
                 var usersInGroup = db.Users.Where(u => u.StudyGroupId.Equals(survey.StudyGroupId)).ToList();
                 foreach (var user in usersInGroup)
                 {
-                    if (user.DeviceId != null)
-                        deviceIds.Add(user.DeviceId);
+                    var devicesForOneUser = db.Devices.Where(d => d.UserId.Equals(user.Id));
+                    foreach(var device in devicesForOneUser)
+                    {
+                        deviceIds.Add(device.DeviceId);
+                    }
+
+                       // deviceIds.Add(user.DeviceId);
                 }
                 //deviceIds.RemoveAt(0);
                 //deviceIds.Add("ebR53cvFzu8:APA91bHk0D_Bwth1jeD-pJ4Q3aztg8C8USt8qFf5_fOV4aflIMVqjoc0HsAYQARcUfik3NfkuQG21jh265tJzBi7efPXw77__JEzaDSbPG8rAiZBTguobpNEjCPnCUPzM9zawIpgcO2o");
@@ -238,7 +255,7 @@ namespace Homework05.API_Controllers
                     RegisteredDeviceIds = deviceIds,
                     Data = new PushNotificationData
                     {
-                        Message = survey.Question.QuestionText,
+                        Message = surveyToSend.Question.QuestionText,
                         Time = DateTime.Now.ToString()
                     }
 

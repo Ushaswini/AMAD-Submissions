@@ -96,6 +96,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         //editor.commit();
         access_token = sharedPref.getString("token","");
         if (!access_token.equals("")) {
+            Log.d("demo sender id",getResources().getString(R.string.gcm_defaultSenderId));
             Intent intent = new Intent(LoginActivity.this, NavigationDrawerActivity.class);
             intent.putExtra("access_token", access_token);
             startActivity(intent);
