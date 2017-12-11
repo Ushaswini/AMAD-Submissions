@@ -36,6 +36,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static edu.uncc.homework4.QuestionType.Choice;
+import static edu.uncc.homework4.QuestionType.Message;
+
 /**
  * Created by Nitin on 11/14/2017.
  */
@@ -47,7 +50,7 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
     public boolean editMode = true;
 
     public interface OnItemClickListener {
-        void onItemClick(View itemView, int position);
+        void onItemClick(int position,int checkedId, String reply);
     }
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
@@ -55,14 +58,14 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView message;
-        public Button sendResponse;
-        public RadioButton btnYes;
-        public RadioButton btnNo;
-        public RadioGroup rgResponse;
-        public EditText textResponse;
-        public TextView textTime;
-        public ImageView tick;
+        public TextView tvMessage;
+        public Button BtnSend;
+        public RadioButton rbYes;
+        public RadioButton rbNo;
+        public RadioGroup rgOptions;
+        public EditText etReplyMsg;
+        public TextView tvTime;
+        public ImageView imMessageTick;
 
 
         Context vContext;
@@ -70,110 +73,25 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
         public ViewHolder(Context context,final View itemView) {
             super(itemView);
 
-            message = (TextView) itemView.findViewById(R.id.textViewMessage);
-            sendResponse = (Button) itemView.findViewById(R.id.buttonSendResponse);
-            btnYes = (RadioButton) itemView.findViewById(R.id.radioButtonYes);
-            btnNo = (RadioButton) itemView.findViewById(R.id.radioButtonNo);
-            rgResponse = (RadioGroup) itemView.findViewById(R.id.rgChoice);
-            textResponse = (EditText)itemView.findViewById(R.id.editTextAns);
-            textTime = (TextView)itemView.findViewById(R.id.messageTime);
-            tick = (ImageView)itemView.findViewById(R.id.imgResponseTick);
+            tvMessage = (TextView) itemView.findViewById(R.id.tvMessage);
+            BtnSend = (Button) itemView.findViewById(R.id.btnSendResponse);
+            rbYes = (RadioButton) itemView.findViewById(R.id.radioButtonYes);
+            rbNo = (RadioButton) itemView.findViewById(R.id.radioButtonNo);
+            rgOptions = (RadioGroup) itemView.findViewById(R.id.rgChoice);
+            etReplyMsg = (EditText)itemView.findViewById(R.id.etAnswer);
+            tvTime = (TextView)itemView.findViewById(R.id.messageTime);
+            imMessageTick = (ImageView)itemView.findViewById(R.id.imgResponseTick);
 
             vContext = context;
-            //SharedPreferences sharedPref =   PreferenceManager.getDefaultSharedPreferences(mContext);// mContext.getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-            //final String access_token = sharedPref.getString("token","");
 
-            SharedPreferences sharedPrefUser = PreferenceManager.getDefaultSharedPreferences(mContext);   //getPreferences(Context.MODE_PRIVATE);
-            Gson gson = new Gson();
-            final User user = gson.fromJson(sharedPrefUser.getString("user",""),User.class);
-
-
-
-            if (sendResponse.isClickable()) {
-                sendResponse.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                      //  if (listener != null) {
-                        String responseText = "";
-                        if(messages.get(getAdapterPosition()).getQuesType() == 0) {
-                            responseText = textResponse.getText().toString();
-                        }else{
-
-                        if(btnYes.isChecked()){responseText = "Yes";}else{responseText = "No";}}
-                            final int position = getAdapterPosition();
-                            if (position != RecyclerView.NO_POSITION) {
-                                //listener.onItemClick(itemView, position);
-                                sendResponse.setEnabled(false);
-                                /*RequestBody formBody = new FormBody.Builder()
-
-                                        .build();*/
-                                SharedPreferences sharedPref = mContext.getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-                                //SharedPreferences.Editor editor = sharedPref.edit();
-                                //editor.  .putString("token",access_token);
-                                //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-                                //editor.commit();
-                                String access_token = sharedPref.getString("token","");
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss z");
-                                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GST-0500"));
-                                Date currDate = null;
-                                try {
-                                    currDate = simpleDateFormat.parse((new Date()).toString());
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                RequestBody formBody = new FormBody.Builder()
-                                        .add("UserId", messages.get(getAdapterPosition()).getUserId())
-                                        .add("StudyGroupId", messages.get(getAdapterPosition()).getStudyGrpId())
-                                        .add("SurveyId", messages.get(getAdapterPosition()).getSurveyId())
-                                        .add("UserResponseText",responseText )
-                                        .add("SurveyResponseReceivedTime", (new Date()).toString())
-                                        .build();
-
-                                Request request = new Request.Builder()
-                                        .url("http://careme-surveypart2.azurewebsites.net/api/SurveyResponses")
-                                        .header("Content-Type","application/x-www-form-urlencoded")
-                                        .header("Authorization", "Bearer "+access_token)
-                                        .post(formBody)
-                                        .build();
-
-                                /*Request request = new Request.Builder()
-                                        .url("http://careme-surveypart2.azurewebsites.net/api/SurveyResponses")//+user.getSurveyGroupId())
-                                        .header("Authorization", "Bearer "+access_token)//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
-                                        .build();*/
-
-                                OkHttpClient client = new OkHttpClient();
-                                client.newCall(request).enqueue(new Callback() {
-                                    @Override
-                                    public void onFailure(Call call, IOException e) {
-                                        Log.d("demo","response failure");
-                                       // Toast.makeText(getContext(),"Error in sending response",Toast.LENGTH_SHORT);
-                                    }
-
-                                    @Override
-                                    public void onResponse(Call call, Response response) throws IOException {
-                                       // Toast.makeText(getContext(),"Response sent successfully !!",Toast.LENGTH_SHORT);
-                                        listener.onItemClick(itemView,position);
-                                        Log.d("demo","response success");
-                                        //itemView.setEnabled(false);
-                                        if(rgResponse.getCheckedRadioButtonId() == R.id.radioButtonYes){
-                                            //btnYes.setBackgroundColor(Color.GREEN);
-                                        }else if(rgResponse.getCheckedRadioButtonId() == R.id.radioButtonNo){
-                                            //btnNo.setBackgroundColor(Color.GREEN);
-                                        }
-                                    }
-                                });
-                            }
-                        //}
+            if(BtnSend.isEnabled()){
+                if (rgOptions.getCheckedRadioButtonId() != -1 || etReplyMsg.getText() != null){
+                    final int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position, rgOptions.getCheckedRadioButtonId(), etReplyMsg.getText().toString());
                     }
-                });
-            }
-
-            /*itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
                 }
-            });*/
+            }
         }
 
     }
@@ -203,86 +121,92 @@ public class MessagesRecyclerAdapter extends RecyclerView.Adapter<MessagesRecycl
 
     @Override
     public void onBindViewHolder(MessagesRecyclerAdapter.ViewHolder holder, int position) {
-        //MusicTrack track = tracks.get(position);
+
         SurveyQuestion surveyQuestion = messages.get(position);
-        holder.message.setText(surveyQuestion.getQuestion());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+        holder.tvMessage.setText(surveyQuestion.getQuestion());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT);
         try {
             Date messageDate = simpleDateFormat.parse(messages.get(position).getSurveyTime());
             PrettyTime p = new PrettyTime();
-            holder.textTime.setText(p.format(messageDate));
+            holder.tvTime.setText(p.format(messageDate));
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
+        switch (surveyQuestion.QuestionType)
+        {
+            case Message:
+            {
+                holder.etReplyMsg.setVisibility(View.GONE);
+                holder.rgOptions.setVisibility(View.GONE);
+                holder.tvMessage.setVisibility(View.VISIBLE);
+                holder.tvMessage.setText(surveyQuestion.getQuestion());
+                holder.imMessageTick.setVisibility(View.GONE);
+                holder.BtnSend.setVisibility(View.GONE);
+                break;
+            }
 
+            case Choice:
+            {
+                holder.tvMessage.setVisibility(View.VISIBLE);
+                holder.rgOptions.setVisibility(View.VISIBLE);
+                holder.BtnSend.setVisibility(View.VISIBLE);
+                holder.etReplyMsg.setVisibility(View.GONE);
+                holder.rgOptions.clearCheck();
 
+                if (surveyQuestion.getResponse() != null)
+                {
+                    holder.tvMessage.setText(surveyQuestion.getQuestion());
+                    holder.BtnSend.setEnabled(false);
+                    holder.imMessageTick.setVisibility(View.VISIBLE);
+                    holder.rgOptions.clearCheck();
+                    if (surveyQuestion.getResponse() == ("Yes"))
+                    {
+                        holder.rbYes.setChecked(true);
+                    }
+                    else
+                    {
+                        holder.rbNo.setChecked(true);
+                    }
+                    holder.rgOptions.setEnabled(false);
+                    holder.rbNo.setEnabled(false);
+                    holder.rbYes.setEnabled(false);
+                }
+                else
+                {
+                    holder.tvMessage.setText(surveyQuestion.getQuestion());
+                    holder.BtnSend.setEnabled(true);
+                    holder.rgOptions.setEnabled(true);
+                    holder.imMessageTick.setVisibility(View.GONE);
+                }
+                break;
+            }
 
-        if (surveyQuestion.getQuesType() == 1) {
+            case TextEntry:
+            {
+                holder.tvMessage.setVisibility(View.VISIBLE);
+                holder.rgOptions.setVisibility(View.GONE);
+                holder.BtnSend.setVisibility(View.VISIBLE);
+                holder.etReplyMsg.setVisibility(View.VISIBLE);
 
-            holder.rgResponse.setVisibility(View.VISIBLE);
-            holder.btnYes.setVisibility(View.VISIBLE);
-            holder.btnNo.setVisibility(View.VISIBLE);
-            holder.sendResponse.setVisibility(View.VISIBLE);
-            holder.tick.setVisibility(View.INVISIBLE);
-            holder.textResponse.setVisibility(View.GONE);
-
-            if (surveyQuestion.getResponse().equals("")) {
-                holder.rgResponse.setEnabled(true);
-                holder.btnYes.setChecked(false);
-                holder.btnNo.setChecked(false);
-                holder.sendResponse.setEnabled(true);
-                holder.tick.setVisibility(View.INVISIBLE);
-
-            } else if (messages.get(position).getResponse().equals("No")) {
-                // holder.rgResponse.setEnabled(false);
-                holder.rgResponse.setEnabled(false);
-                holder.btnNo.setChecked(true);
-                holder.btnYes.setChecked(false);
-                holder.sendResponse.setEnabled(false);
-                holder.tick.setVisibility(View.VISIBLE);
-            } else if (messages.get(position).getResponse().equals("Yes")) {
-                // holder.rgResponse.setEnabled(false);
-                holder.rgResponse.setEnabled(false);
-                holder.btnYes.setChecked(true);
-                holder.btnNo.setChecked(false);
-                holder.sendResponse.setEnabled(false);
-                holder.tick.setVisibility(View.VISIBLE);
+                if (surveyQuestion.getResponse() != null)
+                {
+                    holder.tvMessage.setText(surveyQuestion.getQuestion());
+                    holder.etReplyMsg.setEnabled(false);
+                    holder.etReplyMsg.setText(surveyQuestion.getResponse());
+                    holder.BtnSend.setEnabled(false);
+                    holder.imMessageTick.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    holder.tvMessage.setText(surveyQuestion.getQuestion());
+                    holder.etReplyMsg.setEnabled(true);
+                    holder.BtnSend.setEnabled(true);
+                    holder.imMessageTick.setVisibility(View.GONE);
+                }
+                break;
             }
         }
-        else if(surveyQuestion.getQuesType() == 2){
-            holder.rgResponse.setVisibility(View.GONE);
-            holder.btnYes.setVisibility(View.GONE);
-            holder.btnNo.setVisibility(View.GONE);
-            holder.sendResponse.setVisibility(View.GONE);
-            holder.textResponse.setVisibility(View.GONE);
-            holder.sendResponse.setEnabled(false);
-            holder.tick.setVisibility(View.INVISIBLE);
-        }else if(surveyQuestion.getQuesType() == 0){
-            if (surveyQuestion.getResponse().equals("")) {
-                holder.rgResponse.setVisibility(View.GONE);
-                holder.btnYes.setVisibility(View.GONE);
-                holder.btnNo.setVisibility(View.GONE);
-                holder.sendResponse.setVisibility(View.VISIBLE);
-                holder.textResponse.setVisibility(View.VISIBLE);
-                holder.textResponse.setText("");
-                holder.textResponse.setEnabled(true);
-                holder.sendResponse.setEnabled(true);
-                holder.tick.setVisibility(View.INVISIBLE);
-            }else{
-                holder.rgResponse.setVisibility(View.GONE);
-                holder.btnYes.setVisibility(View.GONE);
-                holder.btnNo.setVisibility(View.GONE);
-                holder.sendResponse.setVisibility(View.VISIBLE);
-                holder.textResponse.setVisibility(View.VISIBLE);
-                holder.textResponse.setEnabled(false);
-                holder.textResponse.setText(surveyQuestion.getResponse());
-                holder.sendResponse.setEnabled(false);
-                holder.tick.setVisibility(View.VISIBLE);
-            }
-        }
-
-        //holder.itemView.setEnabled(editMode);
 
     }
 

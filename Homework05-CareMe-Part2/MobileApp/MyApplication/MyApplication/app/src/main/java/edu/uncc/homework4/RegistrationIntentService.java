@@ -31,9 +31,9 @@ import okhttp3.Response;
  */
 
 public class RegistrationIntentService extends IntentService {
-    SharedPreferences pref;
-    SharedPreferences sharedPreferences;
-    String access_token;
+    SharedPreferences prefs;
+
+    String access_token, user_id;
     public RegistrationIntentService(){
         super("");
     }
@@ -49,85 +49,38 @@ public class RegistrationIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        pref = getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
-        access_token = pref.getString("token","");
-        sharedPreferences = getApplicationContext().getSharedPreferences("isRegistered", Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        prefs = getApplicationContext().getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = prefs.edit();
+
+        access_token = prefs.getString(Constants.AUTH_HEADER,"");
+        user_id = prefs.getString(Constants.USERID,"");
 
         InstanceID instanceID = InstanceID.getInstance(this);
         String token = null;
-        //int id = R.string.;
+
         try {
             token = instanceID.getToken(getApplicationContext().getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-            editor.putString("isRegistered","Yes");
+            editor.putString(Constants.RECEIVE_NOTIFICATION_BOOLEAN,"Yes");
             editor.commit();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Request request = new Request.Builder()
-               // .url("http://careme-surveypart2.azurewebsites.net/api/Users")//+user.getSurveyGroupId())
-                .url("http://careme-surveypart2.azurewebsites.net/api/Account/UserInfo?token="+access_token)
-                //.header("Authorization", "Bearer "+access_token)//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
-                .build();
-
-        OkHttpClient client = new OkHttpClient();
-        final String finalToken = token;
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String id = "";
-                try {
-                   // JSONArray jsonArray = new JSONArray(response.body().string());
-                    //for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject obj = new JSONObject(response.body().string());
-                        id = obj.getString("Id");
-                        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());   //getPreferences(Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString("userId",id);
-                        //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-                        editor.commit();
-
-                        Log.d("demo", "GCM Registration Token: " + finalToken);
-                        Log.d("demo", "id: " + id + " " );
-                        sendDeviceID(finalToken, id);
-                    //}
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
-
-
+        sendDeviceID(token, user_id);
     }
 
-    public void sendDeviceID(String s, String id){
-        //SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        //String access_token = pref.getString("token","");
-
-        //SharedPreferences sharedPref = getApplicationContext().getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-        //SharedPreferences.Editor editor = sharedPref.edit();
-        //editor.  .putString("token",access_token);
-        //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-        //editor.commit();
-        //String access_token = sharedPref.getString("token","");
+    public void sendDeviceID(String device_id, String user_id){
 
         RequestBody formBody = new FormBody.Builder()
-                .add("UserId", id)
-                .add("DeviceId", s)
+                .add("UserId", user_id)
+                .add("DeviceId", device_id)
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://careme-surveypart2.azurewebsites.net/api/Users/UpdateDeviceId")//+user.getSurveyGroupId())
-                .header("Authorization", "Bearer "+access_token)//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
+                .url(Constants.POST_DEVICEID_URL)
+                .header("Authorization", "Bearer "+ access_token)
                 .post(formBody)
                 .build();
 
@@ -141,7 +94,7 @@ public class RegistrationIntentService extends IntentService {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.d("demo","refresh token "+response.body().string() );
+                Log.d("demo","refresh token " + response.body().string() );
             }
         });
     }

@@ -5,16 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -23,15 +18,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-//import com.pushbots.push.Pushbots;
-
-import java.util.ArrayList;
-
 public class NavigationDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
+    SharedPreferences prefs;
+    SharedPreferences.Editor prefsEditor;
+
 
 
     private void addDrawerItems() {
@@ -40,47 +34,50 @@ public class NavigationDrawerActivity extends AppCompatActivity
         mDrawerList.setAdapter(mAdapter);
     }
 
+    private void ShowDialog(){
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage("Allow Care me to send notifications");
+        builder1.setCancelable(false);
+
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        prefsEditor.putString(Constants.RECEIVE_NOTIFICATION_BOOLEAN, "Yes");
+                        prefsEditor.commit();
+                        Intent intent = new Intent(NavigationDrawerActivity.this, RegistrationIntentService.class);
+                        startService(intent);
+                    }
+                });
+
+        builder1.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(NavigationDrawerActivity.this, "Notifications disabled", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("demo sender id",getResources().getString(R.string.gcm_defaultSenderId));
-        System.out.print(R.string.gcm_defaultSenderId);
         setContentView(R.layout.activity_navigation_drawer);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //mDrawerList = (ListView) findViewById(R.id.navList);
-        //addDrawerItems();
-        //Pushbots.sharedInstance().registerForRemoteNotifications();
 
-        final SharedPreferences sharedPreferences = this.getSharedPreferences("isRegistered", Context.MODE_PRIVATE);
-        String wantsNotification = sharedPreferences.getString("isRegistered","");
+        prefs = this.getSharedPreferences(Constants.PREFS,MODE_PRIVATE);
+        prefsEditor = prefs.edit();
+        String wantsNotification = prefs.getString(Constants.RECEIVE_NOTIFICATION_BOOLEAN,"");
+
         if (wantsNotification.equals("")) {
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-            builder1.setMessage("Allow Care me to send notifications");
-            builder1.setCancelable(false);
-
-            builder1.setPositiveButton(
-                    "Yes",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            final SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("isRegistered", "Yes");
-                            editor.commit();
-                            Intent intent = new Intent(NavigationDrawerActivity.this, RegistrationIntentService.class);
-                            startService(intent);
-                        }
-                    });
-
-            builder1.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Toast.makeText(NavigationDrawerActivity.this, "Notifications disabled", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
+            ShowDialog();
         }
 
         MessagesFragment fragment = new MessagesFragment();
@@ -89,15 +86,6 @@ public class NavigationDrawerActivity extends AppCompatActivity
                 .commit();
 
 
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -161,11 +149,15 @@ public class NavigationDrawerActivity extends AppCompatActivity
                     .commit();
 
         } else if (id == R.id.nav_logout) {
-            SharedPreferences sharedPref = getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("token","");
-            //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-            editor.commit();
+
+            //TODO:Delete deviceid
+            prefsEditor.remove(Constants.AUTH_HEADER);
+            prefsEditor.remove(Constants.USERID);
+            prefsEditor.remove(Constants.USERNAME);
+            prefsEditor.remove(Constants.EMAIL);
+            prefsEditor.remove(Constants.REGIONID);
+            prefsEditor.remove(Constants.FULLNAME);
+            prefsEditor.commit();
             finish();
         }
 

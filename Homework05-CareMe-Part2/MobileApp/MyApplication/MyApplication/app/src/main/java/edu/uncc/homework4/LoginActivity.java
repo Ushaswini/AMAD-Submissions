@@ -89,14 +89,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
-        SharedPreferences sharedPref = this.getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-        //SharedPreferences.Editor editor = sharedPref.edit();
-        //editor.  .putString("token",access_token);
-        //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-        //editor.commit();
+        SharedPreferences sharedPref = this.getSharedPreferences("token",Context.MODE_PRIVATE);
         access_token = sharedPref.getString("token","");
         if (!access_token.equals("")) {
-            Log.d("demo sender id",getResources().getString(R.string.gcm_defaultSenderId));
             Intent intent = new Intent(LoginActivity.this, NavigationDrawerActivity.class);
             intent.putExtra("access_token", access_token);
             startActivity(intent);
@@ -231,7 +226,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-       // return email.contains("@");
+        // return email.contains("@");
         return true;
     }
 
@@ -397,7 +392,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://careme-surveypart2.azurewebsites.net/oauth2/token")
+                .url(Constants.LOGIN_URL)
                 .header("Content-Type","application/x-www-form-urlencoded")
                 .post(formBody)
                 .build();
@@ -408,13 +403,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 runOnUiThread(new Runnable() {
                     public void run() {
                         showProgress(false);
-
                         Log.d("demo", e.getMessage());
-
-                        //Intent intent = new Intent(LoginActivity.this, SurveyActivity.class);
-                       // intent.putExtra("access_token", access_token);
-                        //startActivity(intent);
-
+                        Log.d("demo","failed");
                         mPasswordView.setError(getString(R.string.error_incorrect_password));
                         mPasswordView.requestFocus();
                     }
@@ -425,7 +415,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onResponse(Call call, Response response) throws IOException {
 
-                Log.d("demo", response.body().toString());
+                Log.d("demo", response.message());
 
                 if (!response.isSuccessful()) {
                     runOnUiThread(new Runnable() {
@@ -442,26 +432,79 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     JSONObject obj = null;
                     try {
                         obj = new JSONObject(response.body().string());
-
                         access_token = obj.getString("access_token");
+
+                        final Request requestUserInfo = new Request.Builder()
+                                .url(Constants.GET_USERINFO_URL + access_token)
+                                .build();
+
+                        client.newCall(requestUserInfo).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+
+                                if(!response.isSuccessful()){
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            showProgress(false);
+
+                                            //TODO: Show error
+                                        }
+                                    });
+                                }else{
+                                    try {
+                                        String responseBody = response.body().string();
+                                        final UserInfo info = new UserInfo();
+                                        Log.d("demo","responsebody: " + responseBody);
+                                        JSONObject js = new JSONObject(responseBody);
+                                        info.Id = js.getString("Id");
+                                        info.Email = js.getString("Email");
+                                        info.Fullname = js.getString("Fullname");
+                                        info.RegionId = js.getInt("RegionId");
+
+
+
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                SharedPreferences sharedPref = getApplicationContext().getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
+                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                editor.putString(Constants.AUTH_HEADER,access_token);
+                                                editor.putString(Constants.USERID, info.Id);
+                                                editor.putString(Constants.USERNAME, info.Username);
+                                                editor.putString(Constants.EMAIL, info.Email);
+                                                editor.putInt(Constants.REGIONID, info.RegionId);
+                                                editor.putString(Constants.FULLNAME, info.Fullname);
+                                                editor.commit();
+
+                                                showProgress(false);
+                                                Intent intent = new Intent(LoginActivity.this, NavigationDrawerActivity.class);
+                                                intent.putExtra("access_token", access_token);
+                                                startActivity(intent);
+
+                                            }
+                                        });
+
+
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+
+                            }
+                        });
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            showProgress(false);
-                            SharedPreferences sharedPref = getApplicationContext().getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString("token",access_token);
-                            //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-                            editor.commit();
-                            Intent intent = new Intent(LoginActivity.this, NavigationDrawerActivity.class);
-                            intent.putExtra("access_token", access_token);
-                            startActivity(intent);
-                        }
-                    });
+
 
                 }
 

@@ -8,5 +8,11 @@ import java.io.Serializable;
 
 public class UserInfo implements Serializable {
 
-    String userID, token;
+    public String Username;
+    public String Fullname;
+
+    public String Id;
+    public int RegionId;
+
+    public String Email;;
 }

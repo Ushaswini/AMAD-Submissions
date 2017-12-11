@@ -317,7 +317,7 @@ public class SurveyActivity extends AppCompatActivity {
         Log.d("demo", surveyResponse_json);
 
         final Request request = new Request.Builder()
-                .url("http://caremesurvey.azurewebsites.net/api/SurveyResponses")
+                .url(Constants.POST_RESPONSE_URL)
                 .header("Content-Type","application/x-www-form-urlencoded")
                 .header("Authorization","Bearer "+ access_token)
                 .post(formBody)

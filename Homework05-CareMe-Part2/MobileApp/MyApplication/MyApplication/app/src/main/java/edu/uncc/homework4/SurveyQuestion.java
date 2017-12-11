@@ -10,7 +10,7 @@ public class SurveyQuestion implements Serializable {
 
     String question, userId, surveyTime;
     String response,studyGrpId,surveyId,responseDate;
-    int quesType;
+    QuestionType QuestionType;
 
     public SurveyQuestion() {
     }
@@ -63,12 +63,13 @@ public class SurveyQuestion implements Serializable {
         this.userId = userId;
     }
 
-    public int getQuesType() {
-        return quesType;
+    public QuestionType getQuesType() {
+        return QuestionType;
     }
 
     public void setQuesType(int quesType) {
-        this.quesType = quesType;
+
+        this.QuestionType = QuestionType.values()[quesType];
     }
 
     public String getSurveyTime() {
@@ -79,3 +80,4 @@ public class SurveyQuestion implements Serializable {
         this.surveyTime = surveyTime;
     }
 }
+

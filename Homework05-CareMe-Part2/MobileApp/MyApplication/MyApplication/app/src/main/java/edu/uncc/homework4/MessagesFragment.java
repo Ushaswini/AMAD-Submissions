@@ -22,7 +22,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -31,6 +35,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import static edu.uncc.homework4.QuestionType.*;
 
 
 /**
@@ -46,6 +52,11 @@ public class MessagesFragment extends Fragment implements MessagesRecyclerAdapte
     ArrayList<SurveyQuestion> surveyQuestionArrayList;
     RecyclerView messagesView;
     Activity myActivity;
+    SharedPreferences prefs;
+    SharedPreferences.Editor prefsEditor;
+    String UserId = "";
+    String Access_Token = "";
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -53,9 +64,10 @@ public class MessagesFragment extends Fragment implements MessagesRecyclerAdapte
         // Required empty public constructor
     }
 
-public void getMyActivity(Activity activity){
-    this.myActivity = activity;
-}
+    public void getMyActivity(Activity activity) {
+        this.myActivity = activity;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -75,171 +87,95 @@ public void getMyActivity(Activity activity){
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }*/
-
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        SharedPreferences sharedPref = getActivity().getSharedPreferences("token",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-        //SharedPreferences.Editor editor = sharedPref.edit();
-        //editor.  .putString("token",access_token);
-        //editor.putInt(getString(R.string.saved_high_score), newHighScore);
-        //editor.commit();
-        final String access_token = sharedPref.getString("token","");
-        //final String userId = sharedPref.getString("userId", "");
-        final Request requestUserInfo = new Request.Builder()
-                //.url("http://careme-surveypart2.azurewebsites.net/api/Users")
-                .url("http://careme-surveypart2.azurewebsites.net/api/Account/UserInfo?token="+access_token)
-                //.header("Authorization", "Bearer "+ access_token)// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
-                //.header("Content-Type","application/x-www-form-urlencoded")
+
+    private void GetSurveysAsync() {
+
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(Constants.GET_SURVEYS_URL + UserId)
+                .header("Authorization", "Bearer " + Access_Token)
                 .build();
-        OkHttpClient client1 = new OkHttpClient();
-        client1.newCall(requestUserInfo).enqueue(new Callback() {
+
+
+        Log.d("demo", "final" + UserId);
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                Log.d("demo", "failure");
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                OkHttpClient client = new OkHttpClient();
 
-                //Gson gson = new Gson();
+                Log.d("demo", "success");
+                messagesList = new ArrayList<>();
+                final ArrayList<SurveyQuestion> surveysList = new ArrayList<SurveyQuestion>();
+                final String myResponse = response.body().string();
+                Log.d("demo", myResponse + " hello " + messagesList);
 
-                //User user = gson.fromJson(response.body().string(), User.class);
-
-                /*SharedPreferences sharedPref = getActivity().getSharedPreferences("user",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("user",gson.toJson(user));*/
-
-                String userId=response.body().string();
                 try {
-                    Log.d("demo","responsebody: " + userId);
-                    //JSONArray jsonArray = new JSONArray(userId);
-                    //for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject js = new JSONObject(userId);
-                        userId = js.getString("Id");
-                    //}
+                    JSONObject jsonObject = new JSONObject(myResponse);
+                    JSONArray jsonArray = jsonObject.getJSONArray("SurveysResponded");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonO = jsonArray.getJSONObject(i);
+                        SurveyQuestion sq = new SurveyQuestion();
+                        sq.setQuestion(jsonO.getString("QuestionText"));
+                        sq.setResponse(jsonO.getString("ResponseText"));
+                        sq.setSurveyId(jsonO.getString("SurveyId"));
+                        sq.setUserId(UserId);
+                        sq.setQuesType(jsonO.getInt("QuestionType"));
+                        sq.setSurveyTime(jsonO.getString("ResponseReceivedTime"));
+                        surveysList.add(sq);
+                    }
+                    JSONArray jsonArray1 = jsonObject.getJSONArray("Surveys");
+                    for (int i = 0; i < jsonArray1.length(); i++) {
+                        JSONObject jsonO = jsonArray1.getJSONObject(i);
+                        SurveyQuestion sq = new SurveyQuestion();
+                        sq.setQuestion(jsonO.getString("QuestionText"));
+                        sq.setSurveyId(jsonO.getString("SurveyId"));
+                        sq.setStudyGrpId(jsonO.getString("StudyGroupId"));
+                        sq.setUserId(UserId);
+                        sq.setQuesType(jsonO.getInt("QuestionType"));
+                        sq.setSurveyTime(jsonO.getString("SurveyCreatedTime"));
+                        sq.setResponse("");
+                        surveysList.add(sq);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                //SharedPreferences pref = getActivity().getSharedPreferences("userId",Context.MODE_PRIVATE);
-                //String userId = pref.getString("userId","");
-
-                /*SharedPreferences sharedPref1 = getActivity().getSharedPreferences("userId",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-                String userId = sharedPref1.getString("userId","");*/
-                Log.d("demo","user " +userId);
-                Request request = new Request.Builder()
-                        .url("http://careme-surveypart2.azurewebsites.net/api/Surveys/GetSurvey?userId="+userId)
-                        .header("Authorization", "Bearer "+access_token)//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
-                        .build();
-
-
-                final String finalUserId = userId;
-                Log.d("demo","final" + finalUserId);
-                client.newCall(request).enqueue(new Callback() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.d("demo","failure");
-                    }
+                    public void run() {
+                        Log.d("demo", "success adapter");
 
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-
-                        Log.d("demo","success");
-                        messagesList = new ArrayList<>();
-                        surveyQuestionArrayList = new ArrayList<SurveyQuestion>();
-                        //messagesList = response.body().string();
-                        //Log.d("demo", response.body().string());
-                        final String myResponse = response.body().string();
-                        Log.d("demo",myResponse + " hello " + messagesList);
-//                String quest = response.body().string();
-                        // messagesList.add();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                try {
-                                    JSONObject jsonObject = new JSONObject(myResponse);
-                                    JSONArray jsonArray= jsonObject.getJSONArray("SurveysResponded");
-                                    for(int i = 0; i< jsonArray.length(); i++) {
-                                        JSONObject jsonO = jsonArray.getJSONObject(i);
-                                       // if (jsonO.has("QuestionText")) {
-                                            SurveyQuestion sq = new SurveyQuestion();
-                                            sq.setQuestion(jsonO.getString("QuestionText"));
-                                            sq.setResponse(jsonO.getString("ResponseText"));
-                                            sq.setSurveyId(jsonO.getString("SurveyId"));
-                                        sq.setUserId(finalUserId);
-                                        sq.setQuesType(jsonO.getInt("QuestionType"));
-                                        sq.setSurveyTime(jsonO.getString("ResponseReceivedTime"));
-                                        //sq.setStudyGrpId(jsonO.getString("StudyGroupId"));
-                                        //sq.setResponseDate(jsonO.getString(""));
-                                            //Log.d()
-                                            //messagesList.add(jsonO.getString("QuestionText"));
-                                            surveyQuestionArrayList.add(sq);
-                                    }
-                                    JSONArray jsonArray1= jsonObject.getJSONArray("Surveys");
-                                    for(int i = 0; i< jsonArray1.length(); i++) {
-                                        JSONObject jsonO = jsonArray1.getJSONObject(i);
-                                        // if (jsonO.has("QuestionText")) {
-                                        SurveyQuestion sq = new SurveyQuestion();
-                                        sq.setQuestion(jsonO.getString("QuestionText"));
-                                        sq.setSurveyId(jsonO.getString("SurveyId"));
-                                        sq.setStudyGrpId(jsonO.getString("StudyGroupId"));
-                                        sq.setUserId(finalUserId);
-                                        sq.setQuesType(jsonO.getInt("QuestionType"));
-                                        sq.setSurveyTime(jsonO.getString("SurveyCreatedTime"));
-                                        sq.setResponse("");
-                                        //Log.d()
-                                        //messagesList.add(jsonO.getString("QuestionText"));
-                                        surveyQuestionArrayList.add(sq);
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
-                                Log.d("demo","success adapter");
-                                messagesRecyclerAdapter = new MessagesRecyclerAdapter(surveyQuestionArrayList, getContext());
-                                messagesRecyclerAdapter.setOnItemClickListener(MessagesFragment.this);
-                                messagesView = (RecyclerView) getActivity().findViewById(R.id.recyclerViewResult);
-
-                                messagesView.setAdapter(messagesRecyclerAdapter);
-                                messagesView.setLayoutManager(new LinearLayoutManager(getContext()));
-                            }
-                        });
-
-
+                        surveyQuestionArrayList.clear();
+                        surveyQuestionArrayList.addAll(surveysList);
+                        messagesRecyclerAdapter.notifyDataSetChanged();
                     }
                 });
 
 
             }
         });
+    }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        prefs = getActivity().getSharedPreferences(Constants.PREFS, Context.MODE_PRIVATE);
 
+        Access_Token = prefs.getString(Constants.AUTH_HEADER, "");
+        UserId = prefs.getString(Constants.USERID, "");
+        surveyQuestionArrayList = new ArrayList<>();
+        messagesRecyclerAdapter = new MessagesRecyclerAdapter(surveyQuestionArrayList, getContext());
+        messagesRecyclerAdapter.setOnItemClickListener(MessagesFragment.this);
+        messagesView = (RecyclerView) getActivity().findViewById(R.id.recyclerViewResult);
 
-
-        /*Request request = new Request.Builder()
-                .url("http://caremesurvey.azurewebsites.net/api/Surveys?studyGroupId=1")
-                //.header("Content-Type","application/x-www-form-urlencoded")
-                .addHeader("Authorization","Bearer "+access_token)
-                //.header("Authorization","Bearer "+access_token)
-                //.post(formBody)
-                .build();*/
-
-
-
-
-
-        //messagesRecyclerAdapter.notifyDataSetChanged();
+        messagesView.setAdapter(messagesRecyclerAdapter);
+        messagesView.setLayoutManager(new LinearLayoutManager(getContext()));
+        GetSurveysAsync();
     }
 
     @Override
@@ -249,136 +185,60 @@ public void getMyActivity(Activity activity){
     }
 
     @Override
-    public void onItemClick(View itemView, int position) {
-//        itemView.setEnabled(false);
-        SharedPreferences sharedPref = getActivity().getSharedPreferences("token",Context.MODE_PRIVATE);
-        final String access_token = sharedPref.getString("token","");
-        //final String userId = sharedPref.getString("userId", "");
-        final Request requestUserInfo = new Request.Builder()
-                //.url("http://careme-surveypart2.azurewebsites.net/api/Account/Users")
-                .url("http://careme-surveypart2.azurewebsites.net/api/Account/UserInfo?token="+access_token)
-                //.header("Authorization", "Bearer "+ access_token)// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
+    public void onItemClick(int position,int checkedId, String reply) {
+//TODO:Send response and reload data
+
+        SharedPreferences sharedPref = getActivity().getSharedPreferences(Constants.PREFS,Context.MODE_PRIVATE);
+        String access_token = sharedPref.getString(Constants.AUTH_HEADER,"");
+        SurveyQuestion data = surveyQuestionArrayList.get(position);
+        String replyText = "";
+        switch (data.QuestionType)
+        {
+            case Choice:
+            {
+                if (checkedId == R.id.radioButtonYes) replyText = "Yes";
+                else replyText = "No";
+
+                break;
+            }
+            case TextEntry:
+            {
+                replyText = reply;
+                break;
+            }
+        }
+        RequestBody formBody = new FormBody.Builder()
+                .add("UserId", data.getUserId())
+                .add("StudyGroupId", data.getStudyGrpId())
+                .add("SurveyId", data.getSurveyId())
+                .add("UserResponseText",replyText )
+                .add("SurveyResponseReceivedTime", (new Date()).toString())
                 .build();
-        OkHttpClient client1 = new OkHttpClient();
-        client1.newCall(requestUserInfo).enqueue(new Callback() {
+
+        Request request = new Request.Builder()
+                .url(Constants.POST_RESPONSE_URL)
+                .header("Content-Type","application/x-www-form-urlencoded")
+                .header("Authorization", "Bearer "+access_token)
+                .post(formBody)
+                .build();
+
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                Log.d("demo","response failure");
+                // Toast.makeText(getContext(),"Error in sending response",Toast.LENGTH_SHORT);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                OkHttpClient client = new OkHttpClient();
-
-                //Gson gson = new Gson();
-
-                //User user = gson.fromJson(response.body().string(), User.class);
-
-                /*SharedPreferences sharedPref = getActivity().getSharedPreferences("user",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("user",gson.toJson(user));*/
-                String userId="";
-                try {
-                    //JSONArray jsonArray = new JSONArray(response.body().string());
-                    //for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject js = new JSONObject(response.body().string());
-                        userId = js.getString("Id");
-                    //}
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                //SharedPreferences pref = getActivity().getSharedPreferences("userId",Context.MODE_PRIVATE);
-                //String userId = pref.getString("userId","");
-
-                /*SharedPreferences sharedPref1 = getActivity().getSharedPreferences("userId",Context.MODE_PRIVATE);   //getPreferences(Context.MODE_PRIVATE);
-                String userId = sharedPref1.getString("userId","");*/
-
-                Request request = new Request.Builder()
-                        .url("http://careme-surveypart2.azurewebsites.net/api/Surveys/GetSurvey?userId="+userId)
-                        .header("Authorization", "Bearer "+access_token)//eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1bmlxdWVfbmFtZSI6IjU3YWVlZjhmLTMxNDAtNDI5NS04N2ViLThmMzA0Y2Q0Y2ZlNiIsInN1YiI6InVzZXIxIiwicm9sZSI6IlVzZXIiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAvIiwiYXVkIjoiNDE0ZTE5MjdhMzg4NGY2OGFiYzc5ZjcyODM4MzdmZDEiLCJleHAiOjE1MTEyMjkwNTUsIm5iZiI6MTUxMTE0MjY1NX0._c9mA6bFl09xY_vB1Z8iqIYueFKuEfXlzj8J6Os9MtE")
-                        .build();
-
-
-                final String finalUserId = userId;
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.d("demo","failure");
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-
-                        Log.d("demo","success");
-                        messagesList = new ArrayList<>();
-                        surveyQuestionArrayList = new ArrayList<SurveyQuestion>();
-                        //messagesList = response.body().string();
-                        //Log.d("demo", response.body().string());
-                        final String myResponse = response.body().string();
-                        Log.d("demo",myResponse + " hello " + messagesList);
-//                String quest = response.body().string();
-                        // messagesList.add();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                try {
-                                    JSONObject jsonObject = new JSONObject(myResponse);
-                                    JSONArray jsonArray= jsonObject.getJSONArray("SurveysResponded");
-                                    for(int i = 0; i< jsonArray.length(); i++) {
-                                        JSONObject jsonO = jsonArray.getJSONObject(i);
-                                        // if (jsonO.has("QuestionText")) {
-                                        SurveyQuestion sq = new SurveyQuestion();
-                                        sq.setQuestion(jsonO.getString("QuestionText"));
-                                        sq.setResponse(jsonO.getString("ResponseText"));
-                                        sq.setSurveyId(jsonO.getString("SurveyId"));
-                                        sq.setUserId(finalUserId);
-                                        sq.setQuesType(jsonO.getInt("QuestionType"));
-                                        sq.setSurveyTime(jsonO.getString("ResponseReceivedTime"));
-                                        //sq.setStudyGrpId(jsonO.getString("StudyGroupId"));
-                                        //sq.setResponseDate(jsonO.getString(""));
-                                        //Log.d()
-                                        //messagesList.add(jsonO.getString("QuestionText"));
-                                        surveyQuestionArrayList.add(sq);
-                                    }
-                                    JSONArray jsonArray1= jsonObject.getJSONArray("Surveys");
-                                    for(int i = 0; i< jsonArray1.length(); i++) {
-                                        JSONObject jsonO = jsonArray1.getJSONObject(i);
-                                        // if (jsonO.has("QuestionText")) {
-                                        SurveyQuestion sq = new SurveyQuestion();
-                                        sq.setQuestion(jsonO.getString("QuestionText"));
-                                        sq.setSurveyId(jsonO.getString("SurveyId"));
-                                        sq.setStudyGrpId(jsonO.getString("StudyGroupId"));
-                                        sq.setUserId(finalUserId);
-                                        sq.setQuesType(jsonO.getInt("QuestionType"));
-                                        sq.setSurveyTime(jsonO.getString("SurveyCreatedTime"));
-                                        sq.setResponse("");
-                                        //Log.d()
-                                        //messagesList.add(jsonO.getString("QuestionText"));
-                                        surveyQuestionArrayList.add(sq);
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
-                                Log.d("demo","success adapter");
-                                messagesRecyclerAdapter = new MessagesRecyclerAdapter(surveyQuestionArrayList, getContext());
-                                messagesRecyclerAdapter.setOnItemClickListener(MessagesFragment.this);
-                                messagesView = (RecyclerView) getActivity().findViewById(R.id.recyclerViewResult);
-
-                                messagesView.setAdapter(messagesRecyclerAdapter);
-                                messagesView.setLayoutManager(new LinearLayoutManager(getContext()));
-                            }
-                        });
-
-
-                    }
-                });
-
-
+                // Toast.makeText(getContext(),"Response sent successfully !!",Toast.LENGTH_SHORT);
+                Log.d("demo","response success");
+                GetSurveysAsync();
             }
         });
+
 
 
     }
